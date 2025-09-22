@@ -1,0 +1,46 @@
+# Core Deep Learning and Vision
+torch>=2.0
+torchvision
+ultralytics>=8.0
+opencv-python-headless>=4.8
+numpy
+pillow
+tf-keras
+
+# Streamlit and Web Interface
+streamlit>=1.20
+streamlit-webrtc>=0.45
+
+# Face and Emotion Analysis
+deepface>=0.0.83
+fer
+
+# MLOps and Data Versioning
+mlflow>=2.0
+dvc[s3]>=3.0.0   # DVC with S3 remote support
+boto3
+
+# YAML and Parsing
+pyyaml
+
+# FastAPI (optional REST API)
+fastapi
+uvicorn
+
+# Testing
+pytest
+
+# AWS CLI utilities (optional for scripts)
+#awscli
+
+# Misc
+requests
+scikit-learn  # Useful for ML/evaluation utilities
+
+# For linting/development (optional)
+black
+flake8
+isort
+
+# install detectron2 for tracking
+git+https://github.com/facebookresearch/detectron2.git
