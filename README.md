@@ -4,7 +4,7 @@
 
 ```
 cd VR360
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 ## Run Streamlit
