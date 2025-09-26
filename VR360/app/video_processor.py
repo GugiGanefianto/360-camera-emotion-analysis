@@ -42,6 +42,7 @@ def process_stream(input_frame, tracker, cH):
     frame_height = frame.shape[0]
     
 
+    
     bboxes, classes, scores = predict_one_frame(config.FOV, config.THETAs, config.PHIs,
                         frame, frame_width, frame_height,
                         config.sub_image_width,
@@ -81,13 +82,21 @@ def process_stream(input_frame, tracker, cH):
     try :
         annotated = draw_bboxes(frame, bbox_xyxy, track_classes, track_scores,
                                 frame_width, identities, distances_to_camera, dominant_emotions)
+        outdata = {'ids': identities.tolist(),
+                    'x': [item[0] for item in bbox_xyxy], 'y': [item[1] for item in bbox_xyxy],
+                    'w': [item[2]-item[0] for item in bbox_xyxy],
+                    'h': [item[3]-item[1] for item in bbox_xyxy],
+                    'cls': track_classes.tolist(),
+                    'D': np.array(distances_to_camera).tolist(), 'emotion': dominant_emotions}
+        return annotated, outdata
     except UnboundLocalError :
         print("No Tracks!")
         annotated = frame
+        return annotated, None
     except :
         print("Unexpected Error!")
-        annotated = frame
         raise
+    
 
     
     
@@ -119,5 +128,3 @@ def process_stream(input_frame, tracker, cH):
 
     annotated = draw_results(frame, results)
     """
-
-    return annotated
