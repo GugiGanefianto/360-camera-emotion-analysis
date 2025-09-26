@@ -1,6 +1,10 @@
 import streamlit as st
 import torch
+
 import subprocess
+import json
+from collections import defaultdict
+
 from video_processor import process_stream
 from deep_sort.deep_sort import DeepSort
 
@@ -14,6 +18,23 @@ source_type = st.radio(
     ["Uploaded file"],
     #["Webcam", "Uploaded file", "Stream URL"],
 )
+
+
+
+@st.fragment
+def download_video_metadata(vid_log) :
+    json_vid = json.dumps(vid_log)
+    st.download_button(label="Download video meta data",
+                        data=json_vid,
+                        file_name="vid.json",
+                        mime="application/json")
+@st.fragment
+def download_output_rawdata(rawdata_log) :
+    json_raw = json.dumps(rawdata_log)
+    st.download_button(label="Download output data",
+                        data=json_raw,
+                        file_name="out.json",
+                        mime="application/json")
 
 
 
@@ -59,22 +80,39 @@ elif source_type == "Uploaded file" :
             video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             video_frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             video_fps = int(round(cap.get(cv2.CAP_PROP_FPS)))
+            # to log the input video information
+            vid_log = defaultdict(list)
+            vid_log["info"] = {"x_extent": video_width,
+                                "y_extent": video_height,  
+                                "frame_count": video_frame_count,
+                                "fps": video_fps}
             # specify a writer to write a processed video to a disk frame by frame
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             outputfile = cv2.VideoWriter(out_file_result, fourcc, video_fps, (video_width, video_height))
             
             #stframe = st.empty()
             
-            while cap.isOpened():
+            frame_num = 1
+            rawdata_log = defaultdict(list) # to log bbox, distances, and dominant emotions
+            while cap.isOpened() :
                 ret, frame = cap.read()
-                if not ret:
+                if not ret :
                     break
-                annotated = process_stream(frame,tracker,float(camH) )
+                annotated, rawdata = process_stream(frame,tracker,float(camH) )
                 #stframe.image(cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB), channels="RGB")
                 outputfile.write(annotated)
+                if rawdata != None :
+                    rawdata_log[frame_num] = rawdata
+                frame_num += 1
             outputfile.release()
             cap.release()
 
+            
+            # download files
+            download_video_metadata(vid_log)
+            download_output_rawdata(rawdata_log)
+            
+            
             # re-encodes video to H264 using ffmpeg
             convertedVideo = "./convertedh264.mp4"
             subprocess.call(args=f"ffmpeg -y -i {out_file_result} -c:v libx264 {convertedVideo}".split(" "))
@@ -82,14 +120,9 @@ elif source_type == "Uploaded file" :
             # show results
             st.video(convertedVideo)
 
-            '''
-            with open(convertedVideo, 'rb') as file_download :
-                # download file
-                st.download_button(label="Download",
-                                    data=file_download,
-                                    file_name = "output_video.mp4",
-                                    mime="video/mp4")
-            '''
+            
+            
+            
 
                 
             
