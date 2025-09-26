@@ -1,5 +1,11 @@
 # 360 Video Analytics Dashboard
 
+## Clone the Repository
+
+```
+git clone https://github.com/GugiGanefianto/360-camera-emotion-analysis.git
+```
+
 ## Installation
 
 ```
